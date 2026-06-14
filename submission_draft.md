@@ -21,11 +21,11 @@ The game is inspired by a few June themes from the challenge prompt:
 
 ## Demo
 
-Demo video: `demo.mp4`
+Demo video: [demo.mp4](https://github.com/desciple88/solstice-cipher-devto-game-jam/blob/main/demo.mp4)
 
-Playable game: `index.html`
+Playable game: https://desciple88.github.io/solstice-cipher-devto-game-jam/
 
-Source folder: `outputs/devto_game_jam_2026_solstice_cipher/`
+Source code: https://github.com/desciple88/solstice-cipher-devto-game-jam
 
 ## How It Works
 
