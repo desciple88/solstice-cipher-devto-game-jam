@@ -21,7 +21,7 @@ The game is inspired by a few June themes from the challenge prompt:
 
 ## Demo
 
-Demo video: [demo.mp4](https://desciple88.github.io/solstice-cipher-devto-game-jam/demo.mp4)
+Demo video: [watch in browser](https://desciple88.github.io/solstice-cipher-devto-game-jam/demo.html) / [direct MP4](https://desciple88.github.io/solstice-cipher-devto-game-jam/demo.mp4)
 
 Playable game: https://desciple88.github.io/solstice-cipher-devto-game-jam/
 
