@@ -30,6 +30,10 @@ Controls:
 
 No external runtime dependencies are required.
 
+## License
+
+MIT
+
 ## AI Disclosure
 
 The code and copy were prepared with AI assistance, then assembled and verified locally. The game does not currently claim the Best Google AI Usage category because the local Gemini CLI was unavailable during the build.
