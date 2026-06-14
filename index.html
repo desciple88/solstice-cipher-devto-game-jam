@@ -1,0 +1,837 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Solstice Cipher</title>
+  <style>
+    :root {
+      --ink: #121417;
+      --paper: #f7f4ea;
+      --panel: #fffaf0;
+      --gold: #f0b429;
+      --sun: #ffda63;
+      --blue: #2768a6;
+      --teal: #0e8a83;
+      --rose: #d84a6b;
+      --green: #3f8f56;
+      --line: rgba(18, 20, 23, 0.16);
+      --shadow: 0 18px 45px rgba(18, 20, 23, 0.16);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at 18% 12%, rgba(255, 218, 99, 0.58), transparent 28rem),
+        radial-gradient(circle at 82% 78%, rgba(39, 104, 166, 0.26), transparent 24rem),
+        linear-gradient(135deg, #fff5d6 0%, #f7f4ea 43%, #dfe9f4 100%);
+    }
+
+    button {
+      font: inherit;
+    }
+
+    .app {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: minmax(280px, 390px) minmax(360px, 1fr);
+      gap: 24px;
+      padding: 24px;
+    }
+
+    .sidebar {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .brand {
+      padding: 24px;
+      border: 1px solid var(--line);
+      background: rgba(255, 250, 240, 0.84);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(18px);
+    }
+
+    .eyebrow {
+      margin: 0 0 10px;
+      color: var(--blue);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(34px, 5vw, 56px);
+      line-height: 0.95;
+      letter-spacing: 0;
+    }
+
+    .subtitle {
+      margin: 16px 0 0;
+      color: rgba(18, 20, 23, 0.72);
+      font-size: 15px;
+      line-height: 1.55;
+    }
+
+    .card {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(255, 250, 240, 0.82);
+      box-shadow: 0 10px 30px rgba(18, 20, 23, 0.09);
+      backdrop-filter: blur(16px);
+    }
+
+    .panel {
+      padding: 18px;
+    }
+
+    .panel h2 {
+      margin: 0 0 10px;
+      font-size: 15px;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    .stat {
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.48);
+    }
+
+    .stat span {
+      display: block;
+      color: rgba(18, 20, 23, 0.58);
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+
+    .stat strong {
+      display: block;
+      margin-top: 4px;
+      font-size: 20px;
+    }
+
+    .controls {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+
+    .btn {
+      min-height: 42px;
+      border: 1px solid rgba(18, 20, 23, 0.22);
+      border-radius: 8px;
+      color: var(--ink);
+      background: #fff7df;
+      cursor: pointer;
+      transition: transform 120ms ease, background 120ms ease;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+      background: #ffeebc;
+    }
+
+    .btn.primary {
+      border-color: rgba(14, 138, 131, 0.36);
+      color: white;
+      background: var(--teal);
+    }
+
+    .btn.primary:hover {
+      background: #0b746e;
+    }
+
+    .level-list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .level-btn {
+      display: grid;
+      grid-template-columns: 28px 1fr auto;
+      align-items: center;
+      gap: 10px;
+      width: 100%;
+      padding: 10px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      text-align: left;
+      background: rgba(255, 255, 255, 0.5);
+      cursor: pointer;
+    }
+
+    .level-btn.active {
+      border-color: rgba(14, 138, 131, 0.7);
+      background: rgba(14, 138, 131, 0.11);
+    }
+
+    .level-number {
+      display: grid;
+      place-items: center;
+      width: 28px;
+      height: 28px;
+      border-radius: 999px;
+      color: white;
+      background: var(--blue);
+      font-weight: 800;
+    }
+
+    .level-btn.done .level-number {
+      background: var(--green);
+    }
+
+    .level-title {
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .level-theme {
+      color: rgba(18, 20, 23, 0.58);
+      font-size: 12px;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      min-height: 24px;
+      padding: 0 8px;
+      border-radius: 999px;
+      color: var(--blue);
+      background: rgba(39, 104, 166, 0.1);
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .stage-wrap {
+      display: grid;
+      align-content: center;
+      min-height: calc(100vh - 48px);
+    }
+
+    .stage {
+      padding: 20px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(255, 250, 240, 0.72);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(18px);
+    }
+
+    .stage-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .stage-title {
+      margin: 0;
+      font-size: 20px;
+    }
+
+    .stage-copy {
+      margin: 4px 0 0;
+      color: rgba(18, 20, 23, 0.62);
+      font-size: 13px;
+    }
+
+    .meter {
+      width: min(240px, 38vw);
+      height: 12px;
+      overflow: hidden;
+      border: 1px solid rgba(18, 20, 23, 0.2);
+      border-radius: 999px;
+      background: rgba(39, 104, 166, 0.18);
+    }
+
+    .meter-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--rose), var(--gold), var(--sun));
+      transition: width 220ms ease;
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      max-width: min(100%, calc(100vh - 350px));
+      aspect-ratio: 1 / 1;
+      margin: 0 auto;
+      border-radius: 8px;
+      border: 1px solid rgba(18, 20, 23, 0.18);
+      background: #f9f1dc;
+      cursor: pointer;
+      touch-action: manipulation;
+    }
+
+    .message {
+      min-height: 44px;
+      margin-top: 14px;
+      padding: 12px 14px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      color: rgba(18, 20, 23, 0.74);
+      background: rgba(255, 255, 255, 0.48);
+      font-size: 14px;
+      line-height: 1.4;
+    }
+
+    .message.win {
+      border-color: rgba(63, 143, 86, 0.36);
+      color: #24623a;
+      background: rgba(63, 143, 86, 0.13);
+    }
+
+    .how {
+      margin: 0;
+      padding-left: 18px;
+      color: rgba(18, 20, 23, 0.68);
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    @media (max-width: 920px) {
+      .app {
+        grid-template-columns: 1fr;
+        padding: 14px;
+      }
+
+      .stage-wrap {
+        min-height: auto;
+      }
+
+      canvas {
+        max-width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <aside class="sidebar">
+      <section class="brand">
+        <p class="eyebrow">June Solstice Game Jam</p>
+        <h1>Solstice Cipher</h1>
+        <p class="subtitle">A compact light-routing puzzle about the longest day, code-breaking, and the turning point between signal and shadow.</p>
+      </section>
+
+      <section class="card panel">
+        <h2>Run Status</h2>
+        <div class="stats">
+          <div class="stat">
+            <span>Moves</span>
+            <strong id="moves">0</strong>
+          </div>
+          <div class="stat">
+            <span>Signal</span>
+            <strong id="signal">0%</strong>
+          </div>
+          <div class="stat">
+            <span>Solved</span>
+            <strong id="solved">0/4</strong>
+          </div>
+        </div>
+      </section>
+
+      <section class="card panel">
+        <h2>Controls</h2>
+        <div class="controls">
+          <button class="btn primary" id="nextBtn">Next</button>
+          <button class="btn" id="resetBtn">Reset</button>
+          <button class="btn" id="hintBtn">Hint</button>
+          <button class="btn" id="muteBtn">Sound: on</button>
+        </div>
+      </section>
+
+      <section class="card panel">
+        <h2>Levels</h2>
+        <div class="level-list" id="levels"></div>
+      </section>
+
+      <section class="card panel">
+        <h2>How to Play</h2>
+        <ol class="how">
+          <li>Click mirrors to rotate them.</li>
+          <li>Route the solstice beam through every cipher node.</li>
+          <li>Finish at the beacon before the day runs out.</li>
+        </ol>
+      </section>
+    </aside>
+
+    <section class="stage-wrap">
+      <div class="stage">
+        <div class="stage-head">
+          <div>
+            <h2 class="stage-title" id="levelName">Level</h2>
+            <p class="stage-copy" id="levelCopy"></p>
+          </div>
+          <div>
+            <div class="meter" aria-label="Daylight meter"><div class="meter-fill" id="meter"></div></div>
+          </div>
+        </div>
+        <canvas id="board" width="900" height="900" aria-label="Solstice Cipher game board"></canvas>
+        <div class="message" id="message"></div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const DIRS = {
+      E: { x: 1, y: 0 },
+      S: { x: 0, y: 1 },
+      W: { x: -1, y: 0 },
+      N: { x: 0, y: -1 }
+    };
+    const ORDER = ["E", "S", "W", "N"];
+    const REFLECT = {
+      slash: { E: "N", N: "E", W: "S", S: "W" },
+      back: { E: "S", S: "E", W: "N", N: "W" }
+    };
+
+    const levels = [
+      {
+        name: "Dawn Handshake",
+        theme: "Longest day",
+        copy: "Wake the beacon by carrying the first sunrise through a single cipher node.",
+        start: { x: -1, y: 2, dir: "E" },
+        target: { x: 5, y: 0 },
+        required: ["01"],
+        tiles: [
+          { x: 1, y: 2, kind: "mirror", mirror: "back" },
+          { x: 1, y: 1, kind: "cipher", label: "01" },
+          { x: 1, y: 0, kind: "mirror", mirror: "slash" }
+        ],
+        hint: "The first mirror should lift the beam north, then the second mirror sends it east again."
+      },
+      {
+        name: "Turing Turn",
+        theme: "Code-breaking",
+        copy: "The path only unlocks when the beam visits both binary gates before the beacon.",
+        start: { x: 2, y: -1, dir: "S" },
+        target: { x: 5, y: 4 },
+        required: ["10", "11"],
+        tiles: [
+          { x: 2, y: 1, kind: "mirror", mirror: "slash" },
+          { x: 1, y: 1, kind: "cipher", label: "10" },
+          { x: 0, y: 1, kind: "mirror", mirror: "slash" },
+          { x: 0, y: 3, kind: "mirror", mirror: "slash" },
+          { x: 4, y: 3, kind: "cipher", label: "11" },
+          { x: 5, y: 3, kind: "mirror", mirror: "slash" }
+        ],
+        hint: "Make the beam zig-zag: down, left, down, right, down, then east."
+      },
+      {
+        name: "Equator Split",
+        theme: "Light / dark",
+        copy: "One hemisphere gets the long day, the other keeps the shadow. The signal must cross both.",
+        start: { x: -1, y: 0, dir: "E" },
+        target: { x: 2, y: 1 },
+        required: ["00", "01", "10"],
+        tiles: [
+          { x: 0, y: 0, kind: "mirror", mirror: "back" },
+          { x: 0, y: 2, kind: "cipher", label: "00" },
+          { x: 0, y: 4, kind: "mirror", mirror: "slash" },
+          { x: 2, y: 4, kind: "cipher", label: "01" },
+          { x: 4, y: 4, kind: "mirror", mirror: "slash" },
+          { x: 4, y: 1, kind: "cipher", label: "10" },
+          { x: 4, y: 0, kind: "mirror", mirror: "back" },
+          { x: 2, y: 0, kind: "mirror", mirror: "slash" }
+        ],
+        hint: "Use the left side to drop into darkness, then swing right and climb back toward the beacon."
+      },
+      {
+        name: "Solstice Relay",
+        theme: "Turning point",
+        copy: "The final relay compresses day, time, and code into one clean route.",
+        start: { x: -1, y: 5, dir: "E" },
+        target: { x: 5, y: 0 },
+        required: ["T", "U", "R"],
+        tiles: [
+          { x: 0, y: 5, kind: "mirror", mirror: "slash" },
+          { x: 0, y: 3, kind: "cipher", label: "T" },
+          { x: 0, y: 1, kind: "mirror", mirror: "slash" },
+          { x: 2, y: 1, kind: "cipher", label: "U" },
+          { x: 4, y: 1, kind: "mirror", mirror: "slash" },
+          { x: 4, y: 3, kind: "cipher", label: "R" },
+          { x: 4, y: 5, kind: "mirror", mirror: "back" },
+          { x: 5, y: 5, kind: "mirror", mirror: "slash" }
+        ],
+        hint: "Spell TUR by sending the beam up, across, down, across, then up to the top-right beacon."
+      }
+    ];
+
+    const size = 6;
+    const canvas = document.getElementById("board");
+    const ctx = canvas.getContext("2d");
+    const moveEl = document.getElementById("moves");
+    const signalEl = document.getElementById("signal");
+    const solvedEl = document.getElementById("solved");
+    const meterEl = document.getElementById("meter");
+    const messageEl = document.getElementById("message");
+    const levelNameEl = document.getElementById("levelName");
+    const levelCopyEl = document.getElementById("levelCopy");
+    const levelListEl = document.getElementById("levels");
+    const muteBtn = document.getElementById("muteBtn");
+    let levelIndex = 0;
+    let tiles = [];
+    let beam = [];
+    let moves = 0;
+    let solved = new Set();
+    let muted = false;
+    let audio;
+
+    function cloneTiles(level) {
+      return level.tiles.map(tile => ({ ...tile }));
+    }
+
+    function loadLevel(index) {
+      levelIndex = (index + levels.length) % levels.length;
+      tiles = cloneTiles(levels[levelIndex]);
+      moves = 0;
+      messageEl.className = "message";
+      messageEl.textContent = "Rotate mirrors until the sunbeam touches every cipher node and lands on the beacon.";
+      calculateBeam();
+      renderLevelButtons();
+      draw();
+    }
+
+    function tileAt(x, y) {
+      return tiles.find(tile => tile.x === x && tile.y === y);
+    }
+
+    function calculateBeam() {
+      const level = levels[levelIndex];
+      const visited = new Set();
+      const requiredHit = new Set();
+      const points = [];
+      let x = level.start.x;
+      let y = level.start.y;
+      let dir = level.start.dir;
+      let win = false;
+
+      for (let i = 0; i < 64; i += 1) {
+        const d = DIRS[dir];
+        const nx = x + d.x;
+        const ny = y + d.y;
+        points.push({ from: { x, y }, to: { x: nx, y: ny }, dir });
+        x = nx;
+        y = ny;
+
+        if (x === level.target.x && y === level.target.y) {
+          win = level.required.every(label => requiredHit.has(label));
+          break;
+        }
+
+        if (x < 0 || y < 0 || x >= size || y >= size) break;
+        const key = `${x},${y},${dir}`;
+        if (visited.has(key)) break;
+        visited.add(key);
+
+        const tile = tileAt(x, y);
+        if (tile?.kind === "cipher") requiredHit.add(tile.label);
+        if (tile?.kind === "mirror") dir = REFLECT[tile.mirror][dir];
+      }
+
+      beam = points;
+      const progress = Math.round((requiredHit.size / level.required.length) * 100);
+      signalEl.textContent = `${progress}%`;
+      meterEl.style.width = `${Math.min(100, progress + (win ? 0 : 6))}%`;
+      moveEl.textContent = moves;
+      solvedEl.textContent = `${solved.size}/${levels.length}`;
+
+      if (win) {
+        solved.add(levelIndex);
+        messageEl.className = "message win";
+        messageEl.textContent = `Solved: ${level.name}. The beacon received the full cipher before sunset.`;
+        playTone(660, 0.08);
+        playTone(990, 0.12, 0.08);
+      }
+      return win;
+    }
+
+    function cellCenter(cell) {
+      const gap = 42;
+      const cellSize = (canvas.width - gap * 2) / size;
+      return {
+        x: gap + cell.x * cellSize + cellSize / 2,
+        y: gap + cell.y * cellSize + cellSize / 2,
+        cellSize
+      };
+    }
+
+    function boardPoint(point) {
+      const gap = 42;
+      const cellSize = (canvas.width - gap * 2) / size;
+      return {
+        x: gap + point.x * cellSize + cellSize / 2,
+        y: gap + point.y * cellSize + cellSize / 2
+      };
+    }
+
+    function draw() {
+      const w = canvas.width;
+      const h = canvas.height;
+      ctx.clearRect(0, 0, w, h);
+      const gradient = ctx.createLinearGradient(0, 0, w, h);
+      gradient.addColorStop(0, "#fff1b5");
+      gradient.addColorStop(0.52, "#f9f1dc");
+      gradient.addColorStop(1, "#d7e6f3");
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, w, h);
+
+      drawSunAndMoon();
+      drawGrid();
+      drawGoal();
+      drawTiles();
+      drawBeam();
+      drawStart();
+    }
+
+    function drawSunAndMoon() {
+      ctx.save();
+      ctx.globalAlpha = 0.42;
+      ctx.fillStyle = "#ffcf4a";
+      ctx.beginPath();
+      ctx.arc(120, 122, 62, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = "#2768a6";
+      ctx.beginPath();
+      ctx.arc(780, 760, 68, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = "#d7e6f3";
+      ctx.beginPath();
+      ctx.arc(754, 742, 68, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    function drawGrid() {
+      const gap = 42;
+      const cellSize = (canvas.width - gap * 2) / size;
+      for (let y = 0; y < size; y += 1) {
+        for (let x = 0; x < size; x += 1) {
+          const px = gap + x * cellSize;
+          const py = gap + y * cellSize;
+          ctx.fillStyle = (x + y) % 2 === 0 ? "rgba(255,255,255,0.42)" : "rgba(39,104,166,0.06)";
+          ctx.fillRect(px, py, cellSize, cellSize);
+          ctx.strokeStyle = "rgba(18,20,23,0.12)";
+          ctx.lineWidth = 2;
+          ctx.strokeRect(px, py, cellSize, cellSize);
+        }
+      }
+    }
+
+    function drawStart() {
+      const level = levels[levelIndex];
+      const p = boardPoint({ x: Math.max(0, level.start.x), y: Math.max(0, level.start.y) });
+      ctx.save();
+      ctx.fillStyle = "#f0b429";
+      ctx.beginPath();
+      ctx.arc(p.x - 48, p.y, 24, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = "rgba(18,20,23,0.28)";
+      ctx.lineWidth = 3;
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function drawGoal() {
+      const level = levels[levelIndex];
+      const { x, y, cellSize } = cellCenter(level.target);
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.fillStyle = "#0e8a83";
+      ctx.beginPath();
+      for (let i = 0; i < 6; i += 1) {
+        const a = -Math.PI / 2 + i * Math.PI / 3;
+        const r = i % 2 === 0 ? cellSize * 0.28 : cellSize * 0.13;
+        ctx.lineTo(Math.cos(a) * r, Math.sin(a) * r);
+      }
+      ctx.closePath();
+      ctx.fill();
+      ctx.fillStyle = "white";
+      ctx.font = "800 18px Inter, sans-serif";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText("GO", 0, 2);
+      ctx.restore();
+    }
+
+    function drawTiles() {
+      for (const tile of tiles) {
+        const { x, y, cellSize } = cellCenter(tile);
+        ctx.save();
+        ctx.translate(x, y);
+        if (tile.kind === "mirror") {
+          ctx.fillStyle = "rgba(255,255,255,0.68)";
+          roundRect(ctx, -cellSize * 0.34, -cellSize * 0.34, cellSize * 0.68, cellSize * 0.68, 14);
+          ctx.fill();
+          ctx.strokeStyle = "rgba(18,20,23,0.18)";
+          ctx.lineWidth = 3;
+          ctx.stroke();
+          ctx.strokeStyle = tile.mirror === "slash" ? "#2768a6" : "#d84a6b";
+          ctx.lineWidth = 10;
+          ctx.lineCap = "round";
+          ctx.beginPath();
+          if (tile.mirror === "slash") {
+            ctx.moveTo(cellSize * 0.23, -cellSize * 0.23);
+            ctx.lineTo(-cellSize * 0.23, cellSize * 0.23);
+          } else {
+            ctx.moveTo(-cellSize * 0.23, -cellSize * 0.23);
+            ctx.lineTo(cellSize * 0.23, cellSize * 0.23);
+          }
+          ctx.stroke();
+        } else {
+          const hit = beam.some(segment => segment.to.x === tile.x && segment.to.y === tile.y);
+          ctx.fillStyle = hit ? "#3f8f56" : "#fff7df";
+          ctx.strokeStyle = hit ? "rgba(63,143,86,0.52)" : "rgba(18,20,23,0.18)";
+          ctx.lineWidth = 4;
+          ctx.beginPath();
+          ctx.arc(0, 0, cellSize * 0.28, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+          ctx.fillStyle = hit ? "white" : "#121417";
+          ctx.font = "900 24px Inter, sans-serif";
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
+          ctx.fillText(tile.label, 0, 2);
+        }
+        ctx.restore();
+      }
+    }
+
+    function drawBeam() {
+      ctx.save();
+      ctx.strokeStyle = "rgba(255, 183, 54, 0.42)";
+      ctx.lineWidth = 22;
+      ctx.lineCap = "round";
+      ctx.lineJoin = "round";
+      drawBeamPath();
+      ctx.strokeStyle = "#ffda63";
+      ctx.lineWidth = 8;
+      drawBeamPath();
+      ctx.restore();
+    }
+
+    function drawBeamPath() {
+      ctx.beginPath();
+      for (const [index, segment] of beam.entries()) {
+        const from = boardPoint(segment.from);
+        const to = boardPoint(segment.to);
+        if (index === 0) ctx.moveTo(from.x, from.y);
+        ctx.lineTo(to.x, to.y);
+      }
+      ctx.stroke();
+    }
+
+    function roundRect(context, x, y, width, height, radius) {
+      context.beginPath();
+      context.moveTo(x + radius, y);
+      context.lineTo(x + width - radius, y);
+      context.quadraticCurveTo(x + width, y, x + width, y + radius);
+      context.lineTo(x + width, y + height - radius);
+      context.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+      context.lineTo(x + radius, y + height);
+      context.quadraticCurveTo(x, y + height, x, y + height - radius);
+      context.lineTo(x, y + radius);
+      context.quadraticCurveTo(x, y, x + radius, y);
+      context.closePath();
+    }
+
+    function handleCanvasClick(event) {
+      const rect = canvas.getBoundingClientRect();
+      const px = (event.clientX - rect.left) * (canvas.width / rect.width);
+      const py = (event.clientY - rect.top) * (canvas.height / rect.height);
+      const gap = 42;
+      const cellSize = (canvas.width - gap * 2) / size;
+      const x = Math.floor((px - gap) / cellSize);
+      const y = Math.floor((py - gap) / cellSize);
+      const tile = tileAt(x, y);
+      if (!tile || tile.kind !== "mirror") return;
+      tile.mirror = tile.mirror === "slash" ? "back" : "slash";
+      moves += 1;
+      playTone(340, 0.04);
+      calculateBeam();
+      draw();
+      renderLevelButtons();
+    }
+
+    function renderLevelButtons() {
+      levelNameEl.textContent = levels[levelIndex].name;
+      levelCopyEl.textContent = levels[levelIndex].copy;
+      levelListEl.innerHTML = "";
+      for (const [index, level] of levels.entries()) {
+        const button = document.createElement("button");
+        button.className = `level-btn${index === levelIndex ? " active" : ""}${solved.has(index) ? " done" : ""}`;
+        button.innerHTML = `
+          <span class="level-number">${index + 1}</span>
+          <span>
+            <span class="level-title">${level.name}</span><br>
+            <span class="level-theme">${level.theme}</span>
+          </span>
+          <span class="chip">${solved.has(index) ? "done" : level.required.length + " gates"}</span>
+        `;
+        button.addEventListener("click", () => loadLevel(index));
+        levelListEl.appendChild(button);
+      }
+      solvedEl.textContent = `${solved.size}/${levels.length}`;
+    }
+
+    function playTone(frequency, duration, delay = 0) {
+      if (muted) return;
+      if (!audio) audio = new (window.AudioContext || window.webkitAudioContext)();
+      const start = audio.currentTime + delay;
+      const oscillator = audio.createOscillator();
+      const gain = audio.createGain();
+      oscillator.frequency.value = frequency;
+      oscillator.type = "sine";
+      gain.gain.setValueAtTime(0, start);
+      gain.gain.linearRampToValueAtTime(0.06, start + 0.01);
+      gain.gain.exponentialRampToValueAtTime(0.001, start + duration);
+      oscillator.connect(gain).connect(audio.destination);
+      oscillator.start(start);
+      oscillator.stop(start + duration + 0.02);
+    }
+
+    document.getElementById("nextBtn").addEventListener("click", () => loadLevel(levelIndex + 1));
+    document.getElementById("resetBtn").addEventListener("click", () => loadLevel(levelIndex));
+    document.getElementById("hintBtn").addEventListener("click", () => {
+      messageEl.className = "message";
+      messageEl.textContent = levels[levelIndex].hint;
+    });
+    muteBtn.addEventListener("click", () => {
+      muted = !muted;
+      muteBtn.textContent = `Sound: ${muted ? "off" : "on"}`;
+    });
+    canvas.addEventListener("click", handleCanvasClick);
+    window.addEventListener("keydown", event => {
+      if (event.key.toLowerCase() === "r") loadLevel(levelIndex);
+      if (event.key === "ArrowRight") loadLevel(levelIndex + 1);
+      if (event.key === "ArrowLeft") loadLevel(levelIndex - 1);
+      if (event.key.toLowerCase() === "h") {
+        messageEl.textContent = levels[levelIndex].hint;
+      }
+    });
+
+    loadLevel(0);
+  </script>
+</body>
+</html>
